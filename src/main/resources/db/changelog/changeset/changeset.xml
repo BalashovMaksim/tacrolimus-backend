@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet author="Maksim Balashov" id="create-person-table">
+        <sql>
+            CREATE TABLE person (
+            id BIGSERIAL PRIMARY KEY,
+            first_name VARCHAR(20) NOT NULL,
+            last_name VARCHAR(25) NOT NULL,
+            birthday DATE NOT NULL,
+            transplantation_date DATE
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet author="Maksim Balashov" id="create-person_organ-table">
+        <sql>
+            CREATE TABLE person_organ (
+            id BIGSERIAL PRIMARY KEY,
+            person_id BIGINT NOT NULL,
+            organ VARCHAR(100),
+            FOREIGN KEY (person_id) REFERENCES person(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet author="Maksim Balashov" id="create-santa-registration-table">
+        <sql>
+            CREATE TABLE santa_registration (
+            id BIGSERIAL PRIMARY KEY,
+            address VARCHAR(255) NOT NULL,
+            wishes VARCHAR(100) NOT NULL,
+            person_id BIGINT NOT NULL,
+            FOREIGN KEY (person_id) REFERENCES person(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet author="Maksim Balashov" id="create-file-info-table">
+        <sql>
+            CREATE TABLE file_info (
+            id BIGSERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            url VARCHAR(255) NOT NULL,
+            size BIGINT NOT NULL
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet author="Maksim Balashov" id="create-santa-pair-table">
+        <sql>
+            CREATE TABLE santa_pair (
+            id BIGSERIAL PRIMARY KEY,
+            santa_id BIGINT NOT NULL,
+            recipient_id BIGINT NOT NULL,
+            file_id BIGINT NOT NULL,
+            status VARCHAR(20),
+            comment VARCHAR(255),
+            FOREIGN KEY (santa_id) REFERENCES santa_registration(id),
+            FOREIGN KEY (recipient_id) REFERENCES santa_registration(id),
+            FOREIGN KEY (file_id) REFERENCES file_info(id)
+            )
+        </sql>
+    </changeSet>
+
+
+
+</databaseChangeLog>
