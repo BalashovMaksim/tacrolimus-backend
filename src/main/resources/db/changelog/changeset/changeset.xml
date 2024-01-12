@@ -6,6 +6,11 @@
                 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
     <changeSet author="Maksim Balashov" id="20240111-01">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="person"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE person (
             id UUID PRIMARY KEY,
@@ -20,6 +25,11 @@
     </changeSet>
 
     <changeSet author="Maksim Balashov" id="20240111-02">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="person_organ"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE person_organ (
             id UUID PRIMARY KEY,
@@ -31,6 +41,11 @@
     </changeSet>
 
     <changeSet author="Maksim Balashov" id="20240111-03">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="santa_registration"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE santa_registration (
             id UUID PRIMARY KEY,
@@ -43,6 +58,11 @@
     </changeSet>
 
     <changeSet author="Maksim Balashov" id="20240111-04">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="file_info"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE file_info (
             id UUID PRIMARY KEY,
@@ -54,6 +74,11 @@
     </changeSet>
 
     <changeSet author="Maksim Balashov" id="20240111-05">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="santa_pair"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE santa_pair (
             id UUID PRIMARY KEY,
