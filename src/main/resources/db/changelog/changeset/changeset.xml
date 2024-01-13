@@ -19,7 +19,9 @@
             birthday DATE,
             transplantation_date DATE,
             is_activated BOOL DEFAULT FALSE,
-            is_deleted BOOL DEFAULT FALSE
+            is_deleted BOOL DEFAULT FALSE,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         </sql>
     </changeSet>
@@ -35,6 +37,8 @@
             id UUID PRIMARY KEY,
             person_id UUID NOT NULL,
             organ VARCHAR(100),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (person_id) REFERENCES person(id)
             )
         </sql>
@@ -52,6 +56,8 @@
             address VARCHAR(255) NOT NULL,
             wishes VARCHAR(100) NOT NULL,
             person_id UUID NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (person_id) REFERENCES person(id)
             )
         </sql>
@@ -68,7 +74,9 @@
             id UUID PRIMARY KEY,
             name VARCHAR(100) NOT NULL,
             url VARCHAR(255) NOT NULL,
-            size BIGINT NOT NULL
+            size BIGINT NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         </sql>
     </changeSet>
@@ -87,6 +95,8 @@
             file_id UUID,
             status VARCHAR(20) NOT NULL DEFAULT 'CHOOSING',
             comment TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (santa_id) REFERENCES santa_registration(id),
             FOREIGN KEY (recipient_id) REFERENCES santa_registration(id),
             FOREIGN KEY (file_id) REFERENCES file_info(id)
