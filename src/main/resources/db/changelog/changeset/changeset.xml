@@ -34,7 +34,6 @@
         </preConditions>
         <sql>
             CREATE TABLE person_organ (
-            id UUID PRIMARY KEY,
             person_id UUID NOT NULL,
             organ VARCHAR(100),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

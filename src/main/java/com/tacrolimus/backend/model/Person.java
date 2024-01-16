@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.annotations.GenericGenerator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -19,12 +19,17 @@ import java.util.UUID;
 @Table(name = "person")
 public class Person extends BaseEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
     private String firstName;
     private String lastName;
     private LocalDate birthday;
-    private LocalDate transplantationDay;
+    private LocalDate transplantationDate;
 
     @ElementCollection
     @CollectionTable(name = "person_organ", joinColumns = @JoinColumn(name = "person_id"))
