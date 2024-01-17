@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class PersonReadDto {
+public abstract class BasePersonSaveDto {
     private String firstName;
     private String lastName;
     private LocalDate birthday;

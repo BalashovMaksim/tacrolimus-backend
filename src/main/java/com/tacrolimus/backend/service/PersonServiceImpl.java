@@ -1,12 +1,13 @@
 package com.tacrolimus.backend.service;
 
-import com.tacrolimus.backend.dto.CreateDto;
+import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
-import com.tacrolimus.backend.dto.UpdateDto;
+import com.tacrolimus.backend.dto.PersonUpdateDto;
 import com.tacrolimus.backend.model.Person;
 import com.tacrolimus.backend.repository.PersonRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,22 +17,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
 
-    public PersonServiceImpl(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
-
     @Override
     @Transactional
-    public PersonReadDto create(CreateDto createDto) {
+    public PersonReadDto create(PersonCreateDto personCreateDto) {
         Person person = Person.builder()
-                .firstName(createDto.getFirstName())
-                .lastName(createDto.getLastName())
-                .birthday(createDto.getBirthday())
-                .transplantationDate(createDto.getTransplantationDate())
-                .organ(createDto.getOrgan())
+                .firstName(personCreateDto.getFirstName())
+                .lastName(personCreateDto.getLastName())
+                .birthday(personCreateDto.getBirthday())
+                .transplantationDate(personCreateDto.getTransplantationDate())
+                .organ(personCreateDto.getOrgan())
                 .build();
         Person savedPerson = personRepository.save(person);
         return mapToPersonReadDto(savedPerson);
@@ -42,7 +40,7 @@ public class PersonServiceImpl implements PersonService {
     public List<PersonReadDto> getAll() {
         List<Person> persons = personRepository.findAll();
         return persons.stream()
-                .filter(p -> !p.isDeleted())
+                .filter(p -> !p.getIsDeleted())
                 .map(this::mapToPersonReadDto)
                 .collect(Collectors.toList());
     }
@@ -54,7 +52,7 @@ public class PersonServiceImpl implements PersonService {
         List<Person> persons = personRepository.findAll();
         List<PersonReadDto> todayBirthdays = new ArrayList<>();
         for (Person person: persons){
-            if(person.getBirthday().getMonth() == today.getMonth() && person.getBirthday().getDayOfMonth() == today.getDayOfMonth() && !person.isDeleted()){
+            if(person.getBirthday().getMonth() == today.getMonth() && person.getBirthday().getDayOfMonth() == today.getDayOfMonth() && !person.getIsDeleted()){
                 todayBirthdays.add(mapToPersonReadDto(person));
             }
         }
@@ -68,7 +66,7 @@ public class PersonServiceImpl implements PersonService {
         LocalDate plusThirtyDays = today.plusDays(30);
         List<Person> persons = personRepository.findAllByBirthdayBetween(today.getMonthValue(), today.getDayOfMonth(), plusThirtyDays.getMonthValue(), plusThirtyDays.getDayOfMonth());
         return persons.stream()
-                .filter(person -> !person.isDeleted())
+                .filter(p -> !p.getIsDeleted())
                 .map(this::mapToPersonReadDto)
                 .collect(Collectors.toList());
     }
@@ -77,7 +75,7 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public PersonReadDto getById(UUID id) {
         Person person = personRepository.findById(id)
-                .filter(p -> !p.isDeleted())
+                .filter(p -> !p.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
 
         return mapToPersonReadDto(person);
@@ -85,17 +83,16 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public PersonReadDto update(UUID id, UpdateDto updateDto) {
+    public PersonReadDto update(UUID id, PersonUpdateDto personUpdateDto) {
         Person person = personRepository.findById(id)
-                .filter(p -> !p.isDeleted())
+                .filter(p -> !p.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
 
-        person.setFirstName(updateDto.getFirstName());
-        person.setLastName(updateDto.getLastName());
-        person.setBirthday(updateDto.getBirthday());
-        person.setTransplantationDate(updateDto.getTransplantationDate());
-        person.setOrgan(updateDto.getOrgan());
-        person.setUpdatedAt(LocalDate.now());
+        person.setFirstName(personUpdateDto.getFirstName());
+        person.setLastName(personUpdateDto.getLastName());
+        person.setBirthday(personUpdateDto.getBirthday());
+        person.setTransplantationDate(personUpdateDto.getTransplantationDate());
+        person.setOrgan(personUpdateDto.getOrgan());
 
         personRepository.save(person);
 
@@ -106,10 +103,10 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public void deleteById(UUID id) {
         Person person = personRepository.findById(id)
-                .filter(p -> !p.isDeleted())
+                .filter(p -> !p.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
 
-        person.setDeleted(true);
+        person.setIsDeleted(true);
         personRepository.save(person);
     }
 

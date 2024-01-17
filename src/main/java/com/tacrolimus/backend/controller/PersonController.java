@@ -1,9 +1,10 @@
 package com.tacrolimus.backend.controller;
 
-import com.tacrolimus.backend.dto.CreateDto;
+import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
-import com.tacrolimus.backend.dto.UpdateDto;
+import com.tacrolimus.backend.dto.PersonUpdateDto;
 import com.tacrolimus.backend.service.PersonService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,16 +12,13 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/person")
+@RequiredArgsConstructor
 public class PersonController {
     private final PersonService personService;
 
-    public PersonController(PersonService personService) {
-        this.personService = personService;
-    }
-
     @PostMapping("/create")
-    public PersonReadDto create(@RequestBody CreateDto createDto){
-        return personService.create(createDto);
+    public PersonReadDto create(@RequestBody PersonCreateDto personCreateDto){
+        return personService.create(personCreateDto);
     }
     @GetMapping("/all")
     public List<PersonReadDto> getAll(){
@@ -41,8 +39,8 @@ public class PersonController {
         return personService.getById(id);
     }
     @PutMapping("/{id}")
-    public PersonReadDto update(@PathVariable UUID id, @RequestBody UpdateDto updateDto){
-        return personService.update(id,updateDto);
+    public PersonReadDto update(@PathVariable UUID id, @RequestBody PersonUpdateDto personUpdateDto){
+        return personService.update(id,personUpdateDto);
     }
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable UUID id){

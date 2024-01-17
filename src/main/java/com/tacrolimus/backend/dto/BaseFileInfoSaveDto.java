@@ -5,13 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class RegistrationReadDto {
-    private String address;
-    private String wishes;
-    private PersonReadDto person;
+public class BaseFileInfoSaveDto {
+    private String url;
+    private String name;
+    private int size;
 }

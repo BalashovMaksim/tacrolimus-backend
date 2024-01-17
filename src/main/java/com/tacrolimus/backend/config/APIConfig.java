@@ -1,8 +1,6 @@
 package com.tacrolimus.backend.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.context.annotation.Configuration;
-
 
 public class APIConfig {
     public static void loadEnv(){

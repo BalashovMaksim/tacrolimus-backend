@@ -5,13 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class RegistrationReadDto {
+public class BaseRegistrationSaveDto {
     private String address;
     private String wishes;
-    private PersonReadDto person;
+    private UUID personId;
 }

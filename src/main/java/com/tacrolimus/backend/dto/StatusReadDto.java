@@ -1,13 +1,17 @@
 package com.tacrolimus.backend.dto;
 
 import com.tacrolimus.backend.enu.SantaPairStatusEnum;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.util.UUID;
-
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@SuperBuilder
 public class StatusReadDto {
-    private UUID santa;
-    private UUID recipient;
+    private PersonReadDto santa;
+    private PersonReadDto recipient;
     private SantaPairStatusEnum currentStatus;
 }
