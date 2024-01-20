@@ -24,12 +24,10 @@ public class PersonController {
     public List<PersonReadDto> getAll(){
         return personService.getAll();
     }
-
     @GetMapping("/today-birthdays")
     public List<PersonReadDto> getTodayBirthdays(){
         return personService.getTodayBirthdays();
     }
-
     @GetMapping("/next-birthdays")
     public List<PersonReadDto> getNextBirthdays(){
         return personService.getNextBirthdays();

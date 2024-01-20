@@ -3,6 +3,7 @@ package com.tacrolimus.backend.service;
 import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
 import com.tacrolimus.backend.dto.PersonUpdateDto;
+import com.tacrolimus.backend.mapper.PersonMapper;
 import com.tacrolimus.backend.model.Person;
 import com.tacrolimus.backend.repository.PersonRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,19 +20,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
+    private final PersonMapper personMapper;
 
     @Override
     @Transactional
     public PersonReadDto create(PersonCreateDto personCreateDto) {
-        Person person = Person.builder()
-                .firstName(personCreateDto.getFirstName())
-                .lastName(personCreateDto.getLastName())
-                .birthday(personCreateDto.getBirthday())
-                .transplantationDate(personCreateDto.getTransplantationDate())
-                .organ(personCreateDto.getOrgan())
-                .build();
+        Person person = personMapper.toEntity(personCreateDto);
         Person savedPerson = personRepository.save(person);
-        return mapToPersonReadDto(savedPerson);
+        return personMapper.toDto(savedPerson);
     }
 
     @Override
@@ -41,7 +36,7 @@ public class PersonServiceImpl implements PersonService {
         List<Person> persons = personRepository.findAll();
         return persons.stream()
                 .filter(p -> !p.getIsDeleted())
-                .map(this::mapToPersonReadDto)
+                .map(personMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -50,13 +45,13 @@ public class PersonServiceImpl implements PersonService {
     public List<PersonReadDto> getTodayBirthdays() {
         LocalDate today = LocalDate.now();
         List<Person> persons = personRepository.findAll();
-        List<PersonReadDto> todayBirthdays = new ArrayList<>();
-        for (Person person: persons){
-            if(person.getBirthday().getMonth() == today.getMonth() && person.getBirthday().getDayOfMonth() == today.getDayOfMonth() && !person.getIsDeleted()){
-                todayBirthdays.add(mapToPersonReadDto(person));
-            }
-        }
-        return todayBirthdays;
+
+        return persons.stream()
+                .filter(person -> !person.getIsDeleted())
+                .filter(person -> person.getBirthday() != null)
+                .filter(person -> person.getBirthday().equals(today.withYear(person.getBirthday().getYear())))
+                .map(personMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,7 +62,7 @@ public class PersonServiceImpl implements PersonService {
         List<Person> persons = personRepository.findAllByBirthdayBetween(today.getMonthValue(), today.getDayOfMonth(), plusThirtyDays.getMonthValue(), plusThirtyDays.getDayOfMonth());
         return persons.stream()
                 .filter(p -> !p.getIsDeleted())
-                .map(this::mapToPersonReadDto)
+                .map(personMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -78,7 +73,7 @@ public class PersonServiceImpl implements PersonService {
                 .filter(p -> !p.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
 
-        return mapToPersonReadDto(person);
+        return personMapper.toDto(person);
     }
 
     @Override
@@ -88,15 +83,10 @@ public class PersonServiceImpl implements PersonService {
                 .filter(p -> !p.getIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
 
-        person.setFirstName(personUpdateDto.getFirstName());
-        person.setLastName(personUpdateDto.getLastName());
-        person.setBirthday(personUpdateDto.getBirthday());
-        person.setTransplantationDate(personUpdateDto.getTransplantationDate());
-        person.setOrgan(personUpdateDto.getOrgan());
-
+        personMapper.updateEntity(personUpdateDto, person);
         personRepository.save(person);
 
-        return mapToPersonReadDto(person);
+        return personMapper.toDto(person);
     }
 
     @Override
@@ -108,15 +98,5 @@ public class PersonServiceImpl implements PersonService {
 
         person.setIsDeleted(true);
         personRepository.save(person);
-    }
-
-    public PersonReadDto mapToPersonReadDto(Person person) {
-        return PersonReadDto.builder()
-                .firstName(person.getFirstName())
-                .lastName(person.getLastName())
-                .birthday(person.getBirthday())
-                .transplantationDate(person.getTransplantationDate())
-                .organ(person.getOrgan())
-                .build();
     }
 }

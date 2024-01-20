@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public interface PersonService {
     PersonReadDto create(PersonCreateDto personCreateDto);
-    PersonReadDto mapToPersonReadDto(Person person);
     List<PersonReadDto> getAll();
     List<PersonReadDto> getTodayBirthdays();
     List<PersonReadDto> getNextBirthdays();

@@ -1,14 +1,19 @@
 package com.tacrolimus.backend.service;
 
 import com.tacrolimus.backend.dto.FileInfoReadDto;
+import com.tacrolimus.backend.mapper.FileInfoMapper;
 import com.tacrolimus.backend.model.FileInfo;
-import com.tacrolimus.backend.repository.FileRepository;
+import com.tacrolimus.backend.repository.FileInfoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,42 +24,55 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FileServiceImpl implements FileService{
-
-    private final FileRepository fileRepository;
+    private final FileInfoRepository fileInfoRepository;
+    private final FileInfoMapper fileInfoMapper;
 
     @Override
     @Transactional
     public FileInfoReadDto uploadFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("Файл не может быть пустым");
+            throw new IllegalArgumentException("File cannot be empty");
         }
 
+        String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        String extension = StringUtils.getFilenameExtension(filename);
+        String uniqueFileName = UUID.randomUUID() + "." + extension;
+        Path destinationFilePath = Paths.get("C:/santa_files/", uniqueFileName);
+
         try {
-            String extension = Objects.requireNonNull(file.getOriginalFilename())
-                    .substring(file.getOriginalFilename().lastIndexOf("."));
-            String uniqueFileName = UUID.randomUUID().toString() + extension;
-            Path destinationFilePath = Paths.get("C:/santa_files/", uniqueFileName);
-
             Files.createDirectories(destinationFilePath.getParent());
-
             Files.copy(file.getInputStream(), destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
 
             FileInfo fileInfo = FileInfo.builder()
-                    .name(file.getOriginalFilename())
+                    .name(filename)
                     .url(destinationFilePath.toString())
-                    .size((int) file.getSize())
+                    .size(Long.valueOf(file.getSize()).intValue())
                     .build();
 
-            fileInfo = fileRepository.save(fileInfo);
-
-            return new FileInfoReadDto(fileInfo.getUrl(), fileInfo.getName(), fileInfo.getSize());
+            FileInfo savedFileInfo = fileInfoRepository.save(fileInfo);
+            return fileInfoMapper.entityToDto(savedFileInfo);
         } catch (IOException e) {
-            throw new IllegalStateException("Не удалось сохранить файл", e);
+            throw new IllegalStateException("Failed to save file", e);
         }
     }
 
     @Override
-    public MultipartFile downloadFile(UUID id) {
-        return null;
+    @Transactional
+    public Resource downloadFile(UUID id) {
+        FileInfo fileInfo = fileInfoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("File with ID " + id + " not found"));
+        try {
+            Path filePath = Paths.get(fileInfo.getUrl());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Unable to read file");
+            }
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("URL error", e);
+        }
     }
 }
