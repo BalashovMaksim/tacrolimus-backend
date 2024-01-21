@@ -11,8 +11,8 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class SantaPairReadDto {
-    private PersonReadDto santaId;
-    private PersonReadDto recipientId;
+    private PersonReadDto santa;
+    private PersonReadDto recipient;
     private FileInfoReadDto fileId;
     private SantaPairStatusEnum status;
     private String comment;

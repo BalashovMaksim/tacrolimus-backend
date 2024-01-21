@@ -3,8 +3,8 @@ package com.tacrolimus.backend.dto;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
 @SuperBuilder
 public class PersonCreateDto extends BasePersonSaveDto {

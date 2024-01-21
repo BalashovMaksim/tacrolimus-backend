@@ -1,12 +1,10 @@
 package com.tacrolimus.backend.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
 @SuperBuilder
 public class PersonUpdateDto extends BasePersonSaveDto {

@@ -41,15 +41,15 @@ public class SantaController {
     public StatusReadDto getStatus(@PathVariable UUID id) {
         return santaService.getStatus(id);
     }
-    @PatchMapping("/status/transit/{id}")
+    @PatchMapping("/status/set-transit/{id}")
     public void setStatusTransit(@PathVariable UUID id) {
         santaService.setStatusTransit(id);
     }
-    @PatchMapping("/status/reached/{id}")
+    @PatchMapping("/status/set-reached/{id}")
     public void setStatusReached(@PathVariable UUID id, @RequestBody StatusReachedDto statusReachedDto) {
         santaService.setStatusReached(id, statusReachedDto);
     }
-    @PatchMapping("/status/received/{id}")
+    @PatchMapping("/status/set-received/{id}")
     public void setStatusReceived(@PathVariable UUID id) {
         santaService.setStatusReceived(id);
     }

@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SantaPairMapper {
 
-    @Mapping(source = "santa.person", target = "santaId")
-    @Mapping(source = "recipient.person", target = "recipientId")
+    @Mapping(source = "santa.person", target = "santa")
+    @Mapping(source = "recipient.person", target = "recipient")
     @Mapping(source = "file", target = "fileId")
     SantaPairReadDto santaPairToSantaPairReadDto(SantaPair santaPair);
     @Mapping(source = "file", target = "file")

@@ -1,13 +1,16 @@
 package com.tacrolimus.backend.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+import java.util.UUID;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
 public class RegistrationUpdateDto extends BaseRegistrationSaveDto {
+    @JsonIgnore
+    private transient UUID personId;
 }
