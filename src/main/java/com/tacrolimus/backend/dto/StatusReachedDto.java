@@ -1,10 +1,9 @@
 package com.tacrolimus.backend.dto;
 
-import com.tacrolimus.backend.enu.SantaPairStatusEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
@@ -13,7 +12,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 public class StatusReachedDto {
+    @NotNull(message = "File cannot be null")
     private UUID file;
-    private SantaPairStatusEnum newStatus;
+
+    @NotBlank(message = "Comment cannot be blank")
     private String comment;
 }

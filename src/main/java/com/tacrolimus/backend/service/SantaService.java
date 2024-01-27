@@ -36,8 +36,7 @@ public class SantaService {
     public RegistrationReadDto register(RegistrationCreateDto registrationCreateDto) {
         UUID personId = registrationCreateDto.getPersonId();
         if (personRepository.existsById(personId) && !santaRegistrationRepository.existsByPersonId(personId)) {
-            Person person = personRepository.findById(personId)
-                    .orElseThrow(() -> new EntityNotFoundException("Person with ID: " + personId + " not found or already deleted"));
+            Person person = findById(personId);
             SantaRegistration santaRegistration = santaRegistrationMapper.toEntity(registrationCreateDto);
             santaRegistration.setPerson(person);
             santaRegistration = santaRegistrationRepository.save(santaRegistration);
@@ -49,30 +48,24 @@ public class SantaService {
 
     @Transactional
     public RegistrationReadDto getRegistrationById(UUID id) {
-        SantaRegistration santaRegistration = santaRegistrationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Registration with ID: " + id + " not found or already deleted"));
+        SantaRegistration santaRegistration = findRegistrationById(id);
         return santaRegistrationMapper.toDto(santaRegistration);
     }
 
     @Transactional
     public RegistrationReadDto updateRegistration(UUID id, RegistrationUpdateDto registrationUpdateDto) {
-        SantaRegistration santaRegistration = santaRegistrationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Registration with ID: " + id + " not found or already deleted"));
-        if (registrationUpdateDto.getAddress() != null) {
-            santaRegistration.setAddress(registrationUpdateDto.getAddress());
-        }
-        if (registrationUpdateDto.getWishes() != null) {
-            santaRegistration.setWishes(registrationUpdateDto.getWishes());
-        }
+        SantaRegistration santaRegistration = findRegistrationById(id);
+        santaRegistration.setAddress(registrationUpdateDto.getAddress());
+
+        santaRegistration.setWishes(registrationUpdateDto.getWishes());
+
         santaRegistration = santaRegistrationRepository.save(santaRegistration);
         return santaRegistrationMapper.toDto(santaRegistration);
     }
 
     @Transactional
     public void deleteRegistrationById(UUID id) {
-        if (!santaRegistrationRepository.existsById(id)) {
-            throw new EntityNotFoundException("Registration with ID: " + id + " not found or already deleted");
-        }
+        findRegistrationById(id);
         santaRegistrationRepository.deleteById(id);
     }
 
@@ -108,13 +101,13 @@ public class SantaService {
 
     @Transactional
     public StatusReadDto getStatus(UUID id) {
-        SantaPair santaPair = findById(id);
+        SantaPair santaPair = findPairById(id);
         return santaPairMapper.toStatusReadDto(santaPair);
     }
 
     @Transactional
     public void setStatusTransit(UUID id) {
-        SantaPair santaPair = findById(id);
+        SantaPair santaPair = findPairById(id);
 
         santaPair.setStatus(SantaPairStatusEnum.TRANSIT);
         santaPairRepository.save(santaPair);
@@ -122,31 +115,36 @@ public class SantaService {
 
     @Transactional
     public void setStatusReached(UUID id, StatusReachedDto statusReachedDto) {
-        SantaPair santaPair = findById(id);
+        SantaPair santaPair = findPairById(id);
 
         santaPair.setStatus(SantaPairStatusEnum.REACHED);
 
-        if (statusReachedDto.getFile() != null) {
-            FileInfo fileInfo = fileInfoRepository.findById(statusReachedDto.getFile())
-                    .orElseThrow(() -> new EntityNotFoundException("File not found with id " + statusReachedDto.getFile()));
+        FileInfo fileInfo = findFileById(statusReachedDto.getFile());
 
-            santaPair.setFile(fileInfo);
-        }
-
-        if (statusReachedDto.getComment() != null) {
-            santaPair.setComment(statusReachedDto.getComment());
-        }
-
+        santaPair.setFile(fileInfo);
+        santaPair.setComment(statusReachedDto.getComment());
         santaPairRepository.save(santaPair);
     }
     @Transactional
     public void setStatusReceived(UUID id) {
-        SantaPair santaPair = findById(id);
+        SantaPair santaPair = findPairById(id);
         santaPair.setStatus(SantaPairStatusEnum.RECEIVED);
         santaPairRepository.save(santaPair);
     }
-    public SantaPair findById(UUID id) {
+    public Person findById(UUID id){
+        return personRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Person with ID: " + id + " not found or already deleted"));
+    }
+    public SantaRegistration findRegistrationById(UUID id){
+        return santaRegistrationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Registration with ID: " + id + " not found or already deleted"));
+    }
+    public SantaPair findPairById(UUID id) {
         return santaPairRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Santa pair not found with id " + id));
+    }
+    public FileInfo findFileById(UUID id){
+        return fileInfoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("File not found with id " + id));
     }
 }

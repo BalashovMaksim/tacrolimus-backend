@@ -2,6 +2,7 @@ package com.tacrolimus.backend.controller;
 
 import com.tacrolimus.backend.dto.*;
 import com.tacrolimus.backend.service.SantaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ public class SantaController {
     private final SantaService santaService;
 
     @PostMapping("/register")
-    public RegistrationReadDto register(@RequestBody RegistrationCreateDto registrationCreateDto){
+    public RegistrationReadDto register(@Valid @RequestBody RegistrationCreateDto registrationCreateDto){
         return santaService.register(registrationCreateDto);
     }
     @GetMapping("/{id}")
@@ -22,7 +23,7 @@ public class SantaController {
         return santaService.getRegistrationById(id);
     }
     @PutMapping("/{id}")
-    public RegistrationReadDto updateRegistration(@PathVariable UUID id, @RequestBody RegistrationUpdateDto registrationUpdateDto){
+    public RegistrationReadDto updateRegistration(@PathVariable UUID id, @Valid @RequestBody RegistrationUpdateDto registrationUpdateDto){
         return santaService.updateRegistration(id, registrationUpdateDto);
     }
     @DeleteMapping("/{id}")
@@ -46,7 +47,7 @@ public class SantaController {
         santaService.setStatusTransit(id);
     }
     @PatchMapping("/status/set-reached/{id}")
-    public void setStatusReached(@PathVariable UUID id, @RequestBody StatusReachedDto statusReachedDto) {
+    public void setStatusReached(@PathVariable UUID id, @Valid @RequestBody StatusReachedDto statusReachedDto) {
         santaService.setStatusReached(id, statusReachedDto);
     }
     @PatchMapping("/status/set-received/{id}")

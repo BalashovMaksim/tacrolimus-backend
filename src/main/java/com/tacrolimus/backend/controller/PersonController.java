@@ -4,6 +4,7 @@ import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
 import com.tacrolimus.backend.dto.PersonUpdateDto;
 import com.tacrolimus.backend.service.PersonService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class PersonController {
     private final PersonService personService;
 
     @PostMapping("/create")
-    public PersonReadDto create(@RequestBody PersonCreateDto personCreateDto){
+    public PersonReadDto create(@Valid @RequestBody PersonCreateDto personCreateDto){
         return personService.create(personCreateDto);
     }
     @GetMapping("/all")
@@ -37,7 +38,7 @@ public class PersonController {
         return personService.getById(id);
     }
     @PutMapping("/{id}")
-    public PersonReadDto update(@PathVariable UUID id, @RequestBody PersonUpdateDto personUpdateDto){
+    public PersonReadDto update(@PathVariable UUID id, @Valid @RequestBody PersonUpdateDto personUpdateDto){
         return personService.update(id,personUpdateDto);
     }
     @DeleteMapping("/{id}")

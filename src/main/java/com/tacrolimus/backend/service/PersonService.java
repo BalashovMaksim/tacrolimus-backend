@@ -64,18 +64,14 @@ public class PersonService {
 
     @Transactional
     public PersonReadDto getById(UUID id) {
-        Person person = personRepository.findById(id)
-                .filter(p -> !p.getIsDeleted())
-                .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
+        Person person = findById(id);
 
         return personMapper.toDto(person);
     }
 
     @Transactional
     public PersonReadDto update(UUID id, PersonUpdateDto personUpdateDto) {
-        Person person = personRepository.findById(id)
-                .filter(p -> !p.getIsDeleted())
-                .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
+        Person person = findById(id);
 
         personMapper.updateEntity(personUpdateDto, person);
         personRepository.save(person);
@@ -85,11 +81,15 @@ public class PersonService {
 
     @Transactional
     public void deleteById(UUID id) {
-        Person person = personRepository.findById(id)
-                .filter(p -> !p.getIsDeleted())
-                .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
+        Person person = findById(id);
 
         person.setIsDeleted(true);
         personRepository.save(person);
+    }
+
+    public Person findById(UUID id){
+        return personRepository.findById(id)
+                .filter(p -> !p.getIsDeleted())
+                .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
     }
 }
