@@ -3,10 +3,10 @@ package com.tacrolimus.backend.service;
 import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
 import com.tacrolimus.backend.dto.PersonUpdateDto;
+import com.tacrolimus.backend.exception.PersonNotFoundException;
 import com.tacrolimus.backend.mapper.PersonMapper;
 import com.tacrolimus.backend.model.Person;
 import com.tacrolimus.backend.repository.PersonRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -90,6 +90,6 @@ public class PersonService {
     public Person findById(UUID id){
         return personRepository.findById(id)
                 .filter(p -> !p.getIsDeleted())
-                .orElseThrow(() -> new EntityNotFoundException("Person with id " + id + " not found or deleted"));
+                .orElseThrow(() -> new PersonNotFoundException(id));
     }
 }

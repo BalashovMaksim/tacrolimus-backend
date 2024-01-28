@@ -1,6 +1,7 @@
 package com.tacrolimus.backend.service;
 
 import com.tacrolimus.backend.dto.FileInfoReadDto;
+import com.tacrolimus.backend.exception.*;
 import com.tacrolimus.backend.mapper.FileInfoMapper;
 import com.tacrolimus.backend.model.FileInfo;
 import com.tacrolimus.backend.repository.FileInfoRepository;
@@ -34,7 +35,7 @@ public class FileService{
     @Transactional
     public FileInfoReadDto uploadFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File cannot be empty");
+            throw new EmptyFileException();
         }
 
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
@@ -54,14 +55,14 @@ public class FileService{
 
             return fileInfoMapper.entityToDto(savedFileInfo);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to save file", e);
+            throw new FileStorageException(uniqueFileName,e);
         }
     }
 
     @Transactional
     public Resource downloadFile(UUID id) {
         FileInfo fileInfo = fileInfoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("File with ID " + id + " not found"));
+                .orElseThrow(() -> new FileNotFoundException(id));
         try {
             Path filePath = Paths.get(fileInfo.getUrl());
             Resource resource = new UrlResource(filePath.toUri());
@@ -69,11 +70,11 @@ public class FileService{
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("Unable to read file");
+                throw new FileNotReadableException();
             }
 
         } catch (MalformedURLException e) {
-            throw new RuntimeException("URL error", e);
+            throw new InvalidFileUrlException(e);
         }
     }
 }

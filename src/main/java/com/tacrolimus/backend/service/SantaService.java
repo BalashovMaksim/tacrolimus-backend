@@ -2,6 +2,7 @@ package com.tacrolimus.backend.service;
 
 import com.tacrolimus.backend.dto.*;
 import com.tacrolimus.backend.enu.SantaPairStatusEnum;
+import com.tacrolimus.backend.exception.*;
 import com.tacrolimus.backend.mapper.SantaPairMapper;
 import com.tacrolimus.backend.mapper.SantaRegistrationMapper;
 import com.tacrolimus.backend.model.FileInfo;
@@ -12,12 +13,10 @@ import com.tacrolimus.backend.repository.FileInfoRepository;
 import com.tacrolimus.backend.repository.PersonRepository;
 import com.tacrolimus.backend.repository.SantaPairRepository;
 import com.tacrolimus.backend.repository.SantaRegistrationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -35,15 +34,16 @@ public class SantaService {
     @Transactional
     public RegistrationReadDto register(RegistrationCreateDto registrationCreateDto) {
         UUID personId = registrationCreateDto.getPersonId();
-        if (personRepository.existsById(personId) && !santaRegistrationRepository.existsByPersonId(personId)) {
-            Person person = findById(personId);
-            SantaRegistration santaRegistration = santaRegistrationMapper.toEntity(registrationCreateDto);
-            santaRegistration.setPerson(person);
-            santaRegistration = santaRegistrationRepository.save(santaRegistration);
-            return santaRegistrationMapper.toDto(santaRegistration);
-        } else {
-            throw new IllegalStateException("Person with ID: " + personId + " is already registered");
+        if (santaRegistrationRepository.existsByPersonId(personId)) {
+            throw new PersonAlreadyRegisteredException(personId);
         }
+        Person person = findById(personId);
+
+        SantaRegistration santaRegistration = santaRegistrationMapper.toEntity(registrationCreateDto);
+        santaRegistration.setPerson(person);
+        santaRegistration = santaRegistrationRepository.save(santaRegistration);
+
+        return santaRegistrationMapper.toDto(santaRegistration);
     }
 
     @Transactional
@@ -55,8 +55,8 @@ public class SantaService {
     @Transactional
     public RegistrationReadDto updateRegistration(UUID id, RegistrationUpdateDto registrationUpdateDto) {
         SantaRegistration santaRegistration = findRegistrationById(id);
-        santaRegistration.setAddress(registrationUpdateDto.getAddress());
 
+        santaRegistration.setAddress(registrationUpdateDto.getAddress());
         santaRegistration.setWishes(registrationUpdateDto.getWishes());
 
         santaRegistration = santaRegistrationRepository.save(santaRegistration);
@@ -72,7 +72,7 @@ public class SantaService {
     @Transactional
     public void draw() {
         if (santaPairRepository.count() > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Draw operation is not allowed because pairs already exist.");
+            throw new DrawOperationNotAllowedException(HttpStatus.BAD_REQUEST);
         }
         List<SantaRegistration> registrations = santaRegistrationRepository.findAll();
         Collections.shuffle(registrations);
@@ -96,7 +96,7 @@ public class SantaService {
     public SantaPairReadDto getRecipientBySantaId(UUID santaId) {
         return santaPairRepository.findBySantaId(santaId)
                 .map(santaPairMapper::santaPairToSantaPairReadDto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Santa not found or no recipient assigned"));
+                .orElseThrow(() -> new RecipientNotFoundException(HttpStatus.NOT_FOUND));
     }
 
     @Transactional
@@ -133,18 +133,18 @@ public class SantaService {
     }
     public Person findById(UUID id){
         return personRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Person with ID: " + id + " not found or already deleted"));
+                .orElseThrow(() -> new PersonNotFoundException(id));
     }
     public SantaRegistration findRegistrationById(UUID id){
         return santaRegistrationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Registration with ID: " + id + " not found or already deleted"));
+                .orElseThrow(() -> new SantaRegistrationNotFoundException(id));
     }
     public SantaPair findPairById(UUID id) {
         return santaPairRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Santa pair not found with id " + id));
+                .orElseThrow(() -> new SantaPairNotFoundException(id));
     }
     public FileInfo findFileById(UUID id){
         return fileInfoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("File not found with id " + id));
+                .orElseThrow(() -> new FileNotFoundException(id));
     }
 }
