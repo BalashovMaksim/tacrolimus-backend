@@ -9,3 +9,5 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
+  file:
+    destination-path: ${DESTINATION_FILE_PATH}
