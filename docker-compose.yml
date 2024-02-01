@@ -28,7 +28,21 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./../isup-postgres-data:/var/lib/postgresql/data
+      - ./../tacro-postgres-data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:latest
+    container_name: tacro-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - ./nginx/config:/etc/nginx/conf.d:ro
+      - ./../tacro-nginx-logs:/logs
+
 
 volumes:
   conf:
