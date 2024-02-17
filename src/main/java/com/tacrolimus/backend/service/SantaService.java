@@ -25,11 +25,10 @@ import java.util.*;
 public class SantaService {
     private final SantaRegistrationRepository santaRegistrationRepository;
     private final SantaPairRepository santaPairRepository;
+    private final PersonRepository personRepository;
     private final FileInfoRepository fileInfoRepository;
     private final SantaRegistrationMapper santaRegistrationMapper;
     private final SantaPairMapper santaPairMapper;
-    private final PersonRepository personRepository;
-
 
     @Transactional
     public RegistrationReadDto register(RegistrationCreateDto registrationCreateDto) {

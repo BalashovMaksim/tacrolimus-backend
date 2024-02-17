@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PersonService {
     private final PersonRepository personRepository;
+
     private final PersonMapper personMapper;
 
     @Transactional

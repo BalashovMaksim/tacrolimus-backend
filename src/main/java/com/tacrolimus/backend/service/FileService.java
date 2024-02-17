@@ -26,11 +26,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileService{
     private final FileInfoRepository fileInfoRepository;
+
     private final FileInfoMapper fileInfoMapper;
+
     @Value("${spring.file.destination-path}")
     private String destinationPath;
-
-
 
     @Transactional
     public FileInfoReadDto uploadFile(MultipartFile file) {
