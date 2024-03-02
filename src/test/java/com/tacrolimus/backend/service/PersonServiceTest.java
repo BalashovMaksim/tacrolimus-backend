@@ -4,28 +4,24 @@ import com.tacrolimus.backend.dto.PersonCreateDto;
 import com.tacrolimus.backend.dto.PersonReadDto;
 import com.tacrolimus.backend.dto.PersonUpdateDto;
 import com.tacrolimus.backend.enu.OrganEnum;
+import com.tacrolimus.backend.exception.PersonNotFoundException;
 import com.tacrolimus.backend.mapper.PersonMapper;
+import com.tacrolimus.backend.mapper.PersonMapperImpl;
 import com.tacrolimus.backend.model.Person;
 import com.tacrolimus.backend.repository.PersonRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class PersonServiceTest {
 
@@ -35,14 +31,8 @@ class PersonServiceTest {
     @Mock
     private PersonRepository personRepository;
 
-    @Mock
-    private PersonMapper personMapper;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        personService = new PersonService(personRepository, personMapper);
-    }
+    @Spy
+    private PersonMapper personMapper = new PersonMapperImpl();
 
     @Test
     public void create_ShouldCreatePersonSuccessfully() {
@@ -107,17 +97,6 @@ class PersonServiceTest {
         );
 
         Mockito.when(personRepository.findAll()).thenReturn(mockPersons);
-        Mockito.when(personMapper.toDto(any(Person.class))).thenAnswer(invocation ->
-        {
-            Person person = invocation.getArgument(0);
-            return new PersonReadDto(
-                    person.getFirstName(),
-                    person.getLastName(),
-                    person.getBirthday(),
-                    person.getTransplantationDate(),
-                    person.getOrgan()
-            );
-        });
 
         List<PersonReadDto> result = personService.getAll();
 
@@ -156,14 +135,6 @@ class PersonServiceTest {
         );
 
         Mockito.when(personRepository.findAll()).thenReturn(mockPeople);
-        Mockito.when(personMapper.toDto(any(Person.class))).thenAnswer(invocation -> {
-            Person person = invocation.getArgument(0);
-            return PersonReadDto.builder()
-                    .firstName(person.getFirstName())
-                    .lastName(person.getLastName())
-                    .birthday(person.getBirthday())
-                    .build();
-        });
 
         List<PersonReadDto> result = personService.getTodayBirthdays();
 
@@ -187,21 +158,12 @@ class PersonServiceTest {
                 .lastName("Balashov")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .transplantationDate(LocalDate.of(2020, 1, 1))
-                .organ(List.of(OrganEnum.HEART))
+                .organ(new ArrayList<>(List.of(OrganEnum.HEART)))
                 .isActivated(true)
                 .isDeleted(false)
                 .build();
 
-        PersonReadDto personReadDto = PersonReadDto.builder()
-                .firstName(person.getFirstName())
-                .lastName(person.getLastName())
-                .birthday(person.getBirthday())
-                .transplantationDate(person.getTransplantationDate())
-                .organ(person.getOrgan())
-                .build();
-
         Mockito.when(personRepository.findById(id)).thenReturn(java.util.Optional.of(person));
-        Mockito.when(personMapper.toDto(any(Person.class))).thenReturn(personReadDto);
 
         PersonReadDto result = personService.getById(id);
 
@@ -231,7 +193,7 @@ class PersonServiceTest {
                 .lastName("Balashov")
                 .birthday(LocalDate.of(1990, 12, 31))
                 .transplantationDate(LocalDate.of(2020, 12, 31))
-                .organ(List.of(OrganEnum.KIDNEY))
+                .organ(new ArrayList<>(List.of(OrganEnum.KIDNEY)))
                 .isActivated(true)
                 .isDeleted(false)
                 .build();
@@ -267,5 +229,40 @@ class PersonServiceTest {
         verify(personRepository).save(any(Person.class));
         verify(personMapper).updateEntity(eq(personUpdateDto), any(Person.class));
         verify(personMapper).toDto(any(Person.class));
+    }
+
+    @Test
+    void givenExisting_whenDelete_thenSuccess() {
+        Person person = spy(Person.builder()
+                .id(UUID.randomUUID())
+                .isDeleted(false)
+                .build());
+
+        when(personRepository.findById(person.getId())).thenReturn(Optional.of(person));
+
+        personService.deleteById(person.getId());
+
+        verify(person).setIsDeleted(true);
+        verify(personRepository).findById(person.getId());
+        verify(personRepository).save(person);
+    }
+
+    @Test
+    void givenIsDeletedTrue_whenFindById_thenException() {
+        Person person = spy(Person.builder()
+                .id(UUID.randomUUID())
+                .isDeleted(true)
+                .build());
+
+        when(personRepository.findById(person.getId())).thenReturn(Optional.of(person));
+
+        assertThrows(PersonNotFoundException.class, () -> personService.findById(person.getId()));
+    }
+
+    @Test
+    void givenNotExistingId_whenFindById_thenException() {
+        when(personRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(PersonNotFoundException.class, () -> personService.findById(UUID.randomUUID()));
     }
 }
