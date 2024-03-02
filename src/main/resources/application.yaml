@@ -2,7 +2,7 @@ spring:
   liquibase:
     enabled: true
   datasource:
-    url: jdbc:postgresql://tacro-postgres:5432/${POSTGRES_URL}
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_URL}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:

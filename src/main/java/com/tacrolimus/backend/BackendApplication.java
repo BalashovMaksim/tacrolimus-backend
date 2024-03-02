@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Основной класс
  */
 @SpringBootApplication
+
 public class BackendApplication {
 	/**
 	 * @param args аргумент
