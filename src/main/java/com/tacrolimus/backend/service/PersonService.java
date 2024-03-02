@@ -7,9 +7,9 @@ import com.tacrolimus.backend.exception.PersonNotFoundException;
 import com.tacrolimus.backend.mapper.PersonMapper;
 import com.tacrolimus.backend.model.Person;
 import com.tacrolimus.backend.repository.PersonRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PersonService {
     private final PersonRepository personRepository;
+
     private final PersonMapper personMapper;
 
     @Transactional
@@ -87,6 +88,7 @@ public class PersonService {
         personRepository.save(person);
     }
 
+    @Transactional(readOnly = true)
     public Person findById(UUID id){
         return personRepository.findById(id)
                 .filter(p -> !p.getIsDeleted())
